@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
+import { MsalBroadcastService, MsalService } from '@azure/msal-angular';
+import { EventMessage, EventType, InteractionStatus } from '@azure/msal-browser';
+import { filter } from 'rxjs/operators';
 import { ToastService } from '@compito/web/ui';
 
 @Component({
@@ -49,19 +52,42 @@ import { ToastService } from '@compito/web/ui';
   ],
 })
 export class LoginComponent implements OnInit {
-  constructor(public auth: AuthService, private activatedRoute: ActivatedRoute, private toast: ToastService) {}
-
+  constructor(private auth: MsalService, private broadcastService: MsalBroadcastService, private activatedRoute: ActivatedRoute, private toast: ToastService) {}
+  loginDisplay = false;
   ngOnInit(): void {
     if (this.activatedRoute.snapshot.queryParams?.code === 'INVALID_SESSION') {
       this.toast.error('Invalid session! Please login again');
     }
-    this.auth.error$.subscribe((error) => {
-      this.toast.error(error.message ?? 'Something went wrong');
-      this.auth.logout();
-    });
-  }
+    this.broadcastService.msalSubject$
+      .pipe(
+        filter((msg: EventMessage) => msg.eventType === EventType.LOGIN_SUCCESS),
+      )
+      .subscribe((result: EventMessage) => {
+        console.log(result);
+      });
 
+    this.broadcastService.inProgress$
+      .pipe(
+        filter((status: InteractionStatus) => status === InteractionStatus.None)
+      )
+      .subscribe(() => {
+        this.setLoginDisplay();
+      })
+  }
+  setLoginDisplay() {
+    this.loginDisplay = this.auth.instance.getAllAccounts().length > 0;
+  }
   login() {
-    this.auth.loginWithRedirect({});
+    this.auth.instance.handleRedirectPromise().then(res =>
+      {
+        const account = this.auth.instance.getAllAccounts();
+        if(account.length === 0) {
+          this.auth.loginRedirect();
+        }
+      }).catch(err=>{
+  // TODO: Handle errors
+  console.log(err);
+});
+    // this.auth.loginRedirect();
   }
 }
