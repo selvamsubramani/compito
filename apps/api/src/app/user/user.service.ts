@@ -20,12 +20,15 @@ import { getUserDetails } from '../core/utils/payload.util';
 import { parseQuery } from '../core/utils/query-parse.util';
 import { PrismaService } from '../prisma.service';
 import { USER_BASIC_DETAILS } from '../task/task.config';
+import { Client } from '@microsoft/microsoft-graph-client';
+
 @Injectable()
 export class UserService {
   private logger = this.compitoLogger.getLogger('USER');
 
   managementClient: ManagementClient<AppMetadata, UserMetadata>;
   authClient: AuthenticationClient;
+  msauthClient: Client;
   constructor(
     private config: ConfigService,
     private prisma: PrismaService,
@@ -34,6 +37,7 @@ export class UserService {
   ) {
     this.managementClient = this.auth.management;
     this.authClient = this.auth.auth;
+    this.msauthClient = this.auth.msauth;
   }
 
   async getUserDetails(sessionToken: string) {
@@ -384,33 +388,33 @@ export class UserService {
       }
     };
 
-    const createUserInAuth0 = async (
-      userId: string,
-      orgId: string,
-      rolesData: Record<string, { name: string; id: string }>,
-    ) => {
-      try {
-        const auth0UserData: SignUpUserData = {
-          family_name: lastName,
-          given_name: firstName,
-          password,
-          email,
-          connection,
+    // const createUserInAuth0 = async (
+    //   userId: string,
+    //   orgId: string,
+    //   rolesData: Record<string, { name: string; id: string }>,
+    // ) => {
+    //   try {
+    //     const auth0UserData: SignUpUserData = {
+    //       family_name: lastName,
+    //       given_name: firstName,
+    //       password,
+    //       email,
+    //       connection,
 
-          user_metadata: {
-            server_signup: 'true',
-            orgs: JSON.stringify([orgId]),
-            userId: userId,
-            roles: JSON.stringify(rolesData),
-          },
-        };
-        return await this.authClient.database.signUp(auth0UserData);
-      } catch (error) {
-        await deleteUserFromLocal(userId);
-        this.logger.error('signup', 'Failed to create user in Auth0', error);
-        throw new InternalServerErrorException('Failed to signup');
-      }
-    };
+    //       user_metadata: {
+    //         server_signup: 'true',
+    //         orgs: JSON.stringify([orgId]),
+    //         userId: userId,
+    //         roles: JSON.stringify(rolesData),
+    //       },
+    //     };
+    //     return await this.authClient.database.signUp(auth0UserData);
+    //   } catch (error) {
+    //     await deleteUserFromLocal(userId);
+    //     this.logger.error('signup', 'Failed to create user in Auth0', error);
+    //     throw new InternalServerErrorException('Failed to signup');
+    //   }
+    // };
     const userSaved = await createUserAndOrg();
     const roles = userSaved.user.roles.reduce((acc, curr) => {
       return {
@@ -418,7 +422,44 @@ export class UserService {
         [curr.orgId]: curr.role,
       };
     }, {});
-    return createUserInAuth0(userSaved.user.id, userSaved.orgId, roles);
+    // return createUserInAuth0(userSaved.user.id, userSaved.orgId, roles);
+debugger;
+    const createUserInAzB2C = async (
+      userId: string,
+      orgId: string,
+      rolesData: Record<string, { name: string; id: string }>,
+    ) => {
+      const extension = `extension_${this.config.get('AZB2C_EXTENSION_CLIENT_ID').replace(/-/g,'')}_user_metadata`
+      const metadata = {
+        server_signup: 'true',
+        orgs: orgId,
+        userId: userId,
+        roles: rolesData
+      }
+      const user = {
+        accountEnabled: true,
+        displayName: `${firstName} ${lastName}`,
+        mailNickname: `${firstName}.${lastName}`,
+        givenName: firstName,
+        mail: email,
+        passwordPolicies: "DisablePasswordExpiration",
+        passwordProfile: {
+          password: password
+        },
+        identities: [
+          {
+            issuer: this.config.get('AZB2C_TENANT_ID'),
+            issuerAssignedId: email,
+            signInType: "emailAddress"
+          }
+        ],
+        [extension]: JSON.stringify([metadata])
+      };
+      console.log(user);
+      return await this.msauthClient.api('/users').post(user);
+    };
+
+    return createUserInAzB2C(userSaved.user.id, userSaved.orgId, roles);
   }
 
   async findAll(query: RequestParams, user: UserPayload) {
