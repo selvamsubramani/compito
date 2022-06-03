@@ -135,6 +135,95 @@ export class UserService {
     }
   }
 
+  async fetchUserDetails(payload: any) {
+    try {
+      const [user, userInvite] = await this.prisma.$transaction([
+        this.prisma.user.findUnique({
+          where: {
+            id: payload.userId,
+          },
+          select: {
+            email: true,
+            orgs: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            projects: {
+              select: {
+                id: true,
+                name: true,
+                orgId: true,
+              },
+            },
+            roles: {
+              select: {
+                orgId: true,
+                role: {
+                  select: {
+                    name: true,
+                    label: true,
+                    permissions: true,
+                  },
+                },
+              },
+            },
+          },
+        }),
+        this.prisma.userInvite.findMany({
+          where: {
+            email: payload.email,
+          },
+          select: {
+            id: true,
+          },
+        }),
+      ]);
+      if (!user) {
+        this.logger.error('getUserDetails', 'User not found');
+        throw new NotFoundException('User not found');
+      }
+      const { orgs = [], projects = [], roles = [] } = user;
+      const projectIds = projects.map(({ id }) => id);
+      const inviteIds = userInvite.map(({ id }) => id);
+      const rolesData = roles.reduce((acc, { role, orgId }) => {
+        return {
+          ...acc,
+          [orgId]: role,
+        };
+      }, {});
+
+      if (payload.org) {
+        if (orgs.findIndex(({ id }) => id === payload.org) < 0) {
+          this.logger.error('getUserDetails', 'User is not part of the selected org');
+          throw new ForbiddenException('No access to org');
+        }
+        const projectsPartOfOrg = projects.filter((project) => project?.orgId === payload.org).map(({ id }) => id);
+        const org = orgs.find(({ id }) => id === payload.org);
+        return {
+          org,
+          projects: projectsPartOfOrg,
+          role: rolesData[payload.org],
+        };
+      }
+      return {
+        orgs,
+        projects: projectIds,
+        invites: inviteIds,
+        roles: rolesData,
+        partOfMultipleOrgs: orgs.length > 1,
+        pendingInvites: inviteIds.length > 0,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      this.logger.error('getUserDetails', 'Failed to fetch user details');
+      throw new InternalServerErrorException('Failed to fetch user details');
+    }
+  }
+
   async getOnboardingDetails(sessionToken: string) {
     try {
       const secret = this.config.get('SESSION_TOKEN_SECRET');
@@ -423,19 +512,12 @@ export class UserService {
       };
     }, {});
     // return createUserInAuth0(userSaved.user.id, userSaved.orgId, roles);
-debugger;
     const createUserInAzB2C = async (
       userId: string,
       orgId: string,
       rolesData: Record<string, { name: string; id: string }>,
     ) => {
-      const extension = `extension_${this.config.get('AZB2C_EXTENSION_CLIENT_ID').replace(/-/g,'')}_user_metadata`
-      const metadata = {
-        server_signup: 'true',
-        orgs: orgId,
-        userId: userId,
-        roles: rolesData
-      }
+      const extension = `extension_${this.config.get('AZB2C_EXTENSION_CLIENT_ID')}`
       const user = {
         accountEnabled: true,
         displayName: `${firstName} ${lastName}`,
@@ -448,14 +530,15 @@ debugger;
         },
         identities: [
           {
-            issuer: this.config.get('AZB2C_TENANT_ID'),
+            issuer: this.config.get('AZB2C_TENANT_NAME'),
             issuerAssignedId: email,
             signInType: "emailAddress"
           }
         ],
-        [extension]: JSON.stringify([metadata])
+        [`${extension}_userid`]: userId,
+        [`${extension}_orgs`]: orgId,
+        [`${extension}_roles`]: JSON.stringify(rolesData)
       };
-      console.log(user);
       return await this.msauthClient.api('/users').post(user);
     };
 
@@ -464,6 +547,7 @@ debugger;
 
   async findAll(query: RequestParams, user: UserPayload) {
     const { org, role, userId } = getUserDetails(user);
+    console.log(role);
     let whereCondition: Prisma.UserWhereInput = {};
     switch (role.name) {
       /**

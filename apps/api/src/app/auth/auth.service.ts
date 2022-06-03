@@ -36,7 +36,7 @@ export class AuthService {
 
     //region Sign up in Azure B2C using Microsoft Graph API
     let scopes: string[] = ["https://graph.microsoft.com/.default"];
-    const credential = new ClientSecretCredential(this.config.get('AZB2C_TENANT_ID'),
+    const credential = new ClientSecretCredential(this.config.get('AZB2C_TENANT_NAME'),
       this.config.get('AZB2C_USER_SIGNUP_CLIENT_ID'),
       this.config.get('AZB2C_USER_SIGNUP_SECRET'));
       

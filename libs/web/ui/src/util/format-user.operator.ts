@@ -11,9 +11,9 @@ export function formatUser() {
         } else {
           const { family_name, given_name, nickname, name, picture, updated_at, email, email_verified, sub } = data;
           return {
-            role: data['https://compito.adi.so/role'],
-            userId: data['https://compito.adi.so/userId'],
-            org: data['https://compito.adi.so/org'],
+            role: data['extension_roles'],
+            userId: data['extension_userid'],
+            org: data['extension_orgs'],
             family_name,
             given_name,
             nickname,
