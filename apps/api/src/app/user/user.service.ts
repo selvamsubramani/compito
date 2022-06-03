@@ -523,10 +523,12 @@ export class UserService {
         displayName: `${firstName} ${lastName}`,
         mailNickname: `${firstName}.${lastName}`,
         givenName: firstName,
+        surname: lastName,
         mail: email,
         passwordPolicies: "DisablePasswordExpiration",
         passwordProfile: {
-          password: password
+          password: password,
+          forceChangePasswordNextSignIn: false
         },
         identities: [
           {
