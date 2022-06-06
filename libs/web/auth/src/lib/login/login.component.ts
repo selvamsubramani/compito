@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AuthService } from '@auth0/auth0-angular';
+// import { AuthService } from '@auth0/auth0-angular';
+import { MsalBroadcastService, MsalService } from '@azure/msal-angular';
+import { EventMessage, EventType, InteractionStatus } from '@azure/msal-browser';
+import { filter,takeUntil } from 'rxjs/operators';
 import { ToastService } from '@compito/web/ui';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'compito-login',
@@ -49,19 +53,33 @@ import { ToastService } from '@compito/web/ui';
   ],
 })
 export class LoginComponent implements OnInit {
-  constructor(public auth: AuthService, private activatedRoute: ActivatedRoute, private toast: ToastService) {}
-
+  private readonly _destroying$ = new Subject<void>();
+  constructor(private broadcastService: MsalBroadcastService, public auth: MsalService, private activatedRoute: ActivatedRoute, private toast: ToastService) {}
   ngOnInit(): void {
     if (this.activatedRoute.snapshot.queryParams?.code === 'INVALID_SESSION') {
       this.toast.error('Invalid session! Please login again');
     }
-    this.auth.error$.subscribe((error) => {
-      this.toast.error(error.message ?? 'Something went wrong');
-      this.auth.logout();
-    });
+    // this.auth.error$.subscribe((error) => {
+    //   this.toast.error(error.message ?? 'Something went wrong');
+    //   this.auth.logout();
+    // });
+    this.broadcastService.inProgress$
+    .pipe(
+      filter((status: InteractionStatus) => status === InteractionStatus.None),
+      takeUntil(this._destroying$)
+    )
+    .subscribe((res) => {
+      console.log(`Login Component - ${res}`);
+    })
   }
 
   login() {
-    this.auth.loginWithRedirect({});
+    // this.auth.instance.handleRedirectPromise();
+    this.auth.instance.loginRedirect();
+  }
+
+  ngOnDestroy(): void {
+    this._destroying$.next(undefined);
+    this._destroying$.complete();
   }
 }

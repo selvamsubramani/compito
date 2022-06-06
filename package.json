@@ -59,6 +59,8 @@
     "@angular/platform-browser-dynamic": "13.0.2",
     "@angular/router": "13.0.2",
     "@auth0/auth0-angular": "^1.6.0",
+    "@azure/msal-angular": "^2.3.0",
+    "@azure/msal-browser": "^2.24.0",
     "@azure/identity": "^2.0.4",
     "@microsoft/microsoft-graph-client": "^3.0.2",
     "@nestjs/axios": "0.0.3",
