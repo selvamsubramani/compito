@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
-import { CardEvent, DataLoading, Invite, Organization } from '@compito/api-interfaces';
-import { Breadcrumb, ConfirmModalComponent, formatUser, ToastService } from '@compito/web/ui';
+import { MsalService } from '@azure/msal-angular';
+import { CardEvent, DataLoading, Invite, Organization, UserDetails } from '@compito/api-interfaces';
+import { Breadcrumb, ConfirmModalComponent, formatUser, ToastService, getUserDetails } from '@compito/web/ui';
 import { DialogService } from '@ngneat/dialog';
 import { Select, Store } from '@ngxs/store';
 import { EMPTY, Observable, of, throwError } from 'rxjs';
@@ -46,13 +47,15 @@ export class OrgsComponent implements OnInit {
   @Select(OrgsState.invitesLoading)
   invitesLoading$!: Observable<DataLoading>;
 
-  user$ = this.auth.user$.pipe(formatUser());
+  user$: Observable<UserDetails|null> = new Observable<UserDetails|null>();// = this.auth.user$.pipe(formatUser());
   constructor(
     private store: Store,
     private dialog: DialogService,
     private toast: ToastService,
-    private auth: AuthService,
-  ) {}
+    private auth: MsalService,
+  ) {
+    this.user$ = getUserDetails(this.auth.instance.getActiveAccount()?.idTokenClaims);
+  }
 
   ngOnInit(): void {
     this.store.dispatch(new OrgsAction.GetAll());

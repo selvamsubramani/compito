@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
+import { MsalService } from '@azure/msal-angular';
 import { UserDetails } from '@compito/api-interfaces';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { formatUser } from '../../util/format-user.operator';
+import { formatUser, getUserDetails } from '../../util/format-user.operator';
 
 @Component({
   selector: 'compito-header',
@@ -147,7 +148,9 @@ export class HeaderComponent {
       link: '/app/orgs',
     },
   ];
-  user$: Observable<UserDetails | null> = this.auth.user$.pipe(formatUser());
+  user$: Observable<UserDetails|null> = new Observable<UserDetails|null>();// = this.auth.user$.pipe(formatUser());
   menuOpen = new BehaviorSubject(false);
-  constructor(public auth: AuthService) {}
+  constructor(public auth: MsalService) {
+    this.user$ = getUserDetails(this.auth.instance.getActiveAccount()?.idTokenClaims);
+  }
 }

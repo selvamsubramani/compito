@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { AuthService } from '@auth0/auth0-angular';
-import { DataLoading, Role, User } from '@compito/api-interfaces';
-import { ConfirmModalComponent, formatUser, ToastService } from '@compito/web/ui';
+// import { AuthService } from '@auth0/auth0-angular';
+import { MsalService } from '@azure/msal-angular';
+import { DataLoading, Role, User, UserDetails } from '@compito/api-interfaces';
+import { ConfirmModalComponent, formatUser, ToastService, getUserDetails } from '@compito/web/ui';
 import { DialogService } from '@ngneat/dialog';
 import { Select, Store } from '@ngxs/store';
 import { Observable, of, throwError } from 'rxjs';
@@ -49,15 +50,16 @@ export class UsersComponent implements OnInit {
   @Select(UsersState.roles)
   roles$!: Observable<Role[]>;
 
-  loggedInUser$ = this.auth.user$.pipe(formatUser());
+  loggedInUser$: Observable<UserDetails|null> = new Observable<UserDetails|null>();// = this.auth.user$.pipe(formatUser());
   constructor(
     private dialog: DialogService,
     private store: Store,
-    private auth: AuthService,
+    private auth: MsalService,
     private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
+    this.loggedInUser$ = getUserDetails(this.auth.instance.getActiveAccount()?.idTokenClaims);
     this.store.dispatch(new UsersAction.GetAll({}));
     this.store.dispatch(new UsersAction.GetInvites());
     this.store.dispatch(new UsersAction.GetRoles());

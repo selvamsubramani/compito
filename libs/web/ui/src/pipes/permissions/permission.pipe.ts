@@ -1,18 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { NgModule, Pipe, PipeTransform } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
+import { MsalService } from '@azure/msal-angular';
 import { UserDetails } from '@compito/api-interfaces';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { formatUser } from '../../util';
+import { formatUser, getUserDetails } from '../../util';
 
 @Pipe({
   name: 'permission',
 })
 export class PermissionPipe implements PipeTransform {
-  user$ = this.auth.user$.pipe(formatUser());
+  user$: Observable<UserDetails|null> = new Observable<UserDetails|null>();// = this.auth.user$.pipe(formatUser());
 
-  constructor(private auth: AuthService) {}
+  constructor(private auth: MsalService) {
+  this.user$ = getUserDetails(this.auth.instance.getActiveAccount()?.idTokenClaims);
+  }
 
   transform(requiredPermission: string): Observable<boolean> {
     return this.user$.pipe(

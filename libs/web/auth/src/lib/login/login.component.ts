@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-// import { AuthService } from '@auth0/auth0-angular';
 import { MsalBroadcastService, MsalService } from '@azure/msal-angular';
 import { EventMessage, EventType, InteractionStatus } from '@azure/msal-browser';
 import { filter,takeUntil } from 'rxjs/operators';
 import { ToastService } from '@compito/web/ui';
 import { Subject } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'compito-login',
@@ -54,15 +54,16 @@ import { Subject } from 'rxjs';
 })
 export class LoginComponent implements OnInit {
   private readonly _destroying$ = new Subject<void>();
-  constructor(private broadcastService: MsalBroadcastService, public auth: MsalService, private activatedRoute: ActivatedRoute, private toast: ToastService) {}
+  constructor(private broadcastService: MsalBroadcastService, 
+    public auth: MsalService, 
+    private activatedRoute: ActivatedRoute, 
+    private toast: ToastService,
+    private router: Router) {}
   ngOnInit(): void {
     if (this.activatedRoute.snapshot.queryParams?.code === 'INVALID_SESSION') {
       this.toast.error('Invalid session! Please login again');
     }
-    // this.auth.error$.subscribe((error) => {
-    //   this.toast.error(error.message ?? 'Something went wrong');
-    //   this.auth.logout();
-    // });
+
     this.broadcastService.inProgress$
     .pipe(
       filter((status: InteractionStatus) => status === InteractionStatus.None),
@@ -71,10 +72,21 @@ export class LoginComponent implements OnInit {
     .subscribe((res) => {
       console.log(`Login Component - ${res}`);
     })
-  }
+
+    this.broadcastService.msalSubject$
+      .pipe(filter((msg: EventMessage) => msg.eventType === EventType.LOGIN_SUCCESS))
+      .subscribe(() =>
+      {
+        if(this.auth.instance.getAllAccounts().length > 0) {
+          this.auth.instance.setActiveAccount(this.auth.instance.getAllAccounts()[0]); 
+        }
+        console.log("Active Account", this.auth.instance.getActiveAccount());
+        this.router.navigate(['/app']); 
+      });
+    }
 
   login() {
-    // this.auth.instance.handleRedirectPromise();
+    this.auth.instance.handleRedirectPromise();
     this.auth.instance.loginRedirect();
   }
 

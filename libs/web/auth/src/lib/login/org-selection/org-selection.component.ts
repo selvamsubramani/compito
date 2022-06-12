@@ -2,7 +2,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
-import { DataLoading, DataLoadingState } from '@compito/api-interfaces';
+import { MsalService } from '@azure/msal-angular';
+import { DataLoading, DataLoadingState, UserDetails } from '@compito/api-interfaces';
 import { ToastService } from '@compito/web/ui';
 import { ENV_TOKEN } from '@compito/web/ui/tokens';
 import { BehaviorSubject, map, Observable } from 'rxjs';
@@ -50,7 +51,7 @@ export class OrgSelectionComponent implements OnInit {
   loadingDetailsState = new BehaviorSubject<DataLoading>({ type: DataLoadingState.loading });
   loadingDetailsState$ = this.loadingDetailsState.asObservable();
 
-  userEmail$: Observable<string | null> = this.auth.user$.pipe(map((user) => user?.email ?? null));
+  userEmail$ =  this.auth.user$.pipe(map((user) => user?.email ?? null));
   constructor(
     private orgService: OrgSelectionService,
     private activatedRoute: ActivatedRoute,
@@ -58,7 +59,8 @@ export class OrgSelectionComponent implements OnInit {
     private toast: ToastService,
     private router: Router,
     @Inject(ENV_TOKEN) private environment: any,
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     if (this.sessionToken) {

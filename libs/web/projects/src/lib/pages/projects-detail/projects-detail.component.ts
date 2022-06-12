@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
+import { MsalService } from '@azure/msal-angular';
 import { Board, CardEvent, DataLoading, Project, User } from '@compito/api-interfaces';
-import { Breadcrumb, ConfirmModalComponent, formatUser, ToastService } from '@compito/web/ui';
+import { Breadcrumb, ConfirmModalComponent, formatUser, ToastService, getUserDetails } from '@compito/web/ui';
 import { UsersAction, UsersState } from '@compito/web/users/state';
 import { DialogService } from '@ngneat/dialog';
 import { Select, Store } from '@ngxs/store';
@@ -52,7 +53,7 @@ export class ProjectsDetailComponent implements OnInit {
     private dialog: DialogService,
     private store: Store,
     private activatedRoute: ActivatedRoute,
-    private auth: AuthService,
+    private auth: MsalService,
     private toast: ToastService,
   ) {}
 
@@ -78,7 +79,7 @@ export class ProjectsDetailComponent implements OnInit {
           isUpdateMode,
         },
       });
-      ref.afterClosed$.pipe(withLatestFrom(this.auth.user$.pipe(formatUser()))).subscribe(([data]) => {
+      ref.afterClosed$.pipe(withLatestFrom(getUserDetails(this.auth.instance.getActiveAccount()?.idTokenClaims))).subscribe(([data]) => {
         if (data) {
           const action = isUpdateMode
             ? this.store.dispatch(new ProjectsAction.UpdateBoard(initialData?.id, data))

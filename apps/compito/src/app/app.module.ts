@@ -82,11 +82,11 @@ enableMapSet();
     //   useClass: TokenValidatorInterceptor,
     //   multi: true,
     // },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: DelayInterceptor,
-      multi: true,
-    },
+    // {
+    //   provide: HTTP_INTERCEPTORS,
+    //   useClass: DelayInterceptor,
+    //   multi: true,
+    // },
     {
       provide: API_TOKEN,
       useValue: environment.api,

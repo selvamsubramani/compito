@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AuthService } from '@auth0/auth0-angular';
-import { Board, DataLoading, Project, Task } from '@compito/api-interfaces';
-import { formatUser } from '@compito/web/ui';
+// import { AuthService } from '@auth0/auth0-angular';
+import { MsalService } from '@azure/msal-angular'
+import { Board, DataLoading, Project, Task, UserDetails } from '@compito/api-interfaces';
+import { formatUser, getUserDetails } from '@compito/web/ui';
 import { Select, Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
 import { HomeAction } from './state/home.actions';
@@ -50,11 +51,12 @@ export class HomeComponent implements OnInit {
   @Select(HomeState.getRecentTasks)
   recentTasks$!: Observable<Task[]>;
 
-  user$ = this.auth.user$.pipe(formatUser());
+  user$: Observable<UserDetails|null> = new Observable<UserDetails|null>();// = this.auth.user$.pipe(formatUser());
 
-  constructor(private store: Store, private auth: AuthService, private activatedRoute: ActivatedRoute) {}
+  constructor(private store: Store, private msauth: MsalService, private activatedRoute: ActivatedRoute) {}
 
   ngOnInit(): void {
+    this.user$ = getUserDetails(this.msauth.instance.getActiveAccount()?.idTokenClaims);
     this.store.dispatch(new HomeAction.GetProjects());
     this.store.dispatch(new HomeAction.GetRecentTasks());
     this.store.dispatch(new HomeAction.GetHighPriorityTasks());
