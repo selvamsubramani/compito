@@ -28,7 +28,7 @@ export const msalConfig: Configuration = {
 
 export const protectedResources = {
   todoListApi: {
-    endpoint: "https://" + environment.auth.tenantName + ".onmicrosoft.com/api",
+    endpoint: environment.api,
     scopes: ['read','write'],
     scopeurls: ["https://" + environment.auth.tenantName + ".onmicrosoft.com/api/read", "https://" + environment.auth.tenantName + ".onmicrosoft.com/api/write"],
   },
