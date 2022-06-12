@@ -45,7 +45,7 @@ enableMapSet();
         // The protected resource mapping maps your web API with the corresponding app scopes. If your code needs to call another web API, add the URI mapping here.
         interactionType: InteractionType.Redirect,
         protectedResourceMap: new Map([
-          [protectedResources.todoListApi.endpoint, protectedResources.todoListApi.scopes]
+          [protectedResources.todoListApi.endpoint, protectedResources.todoListApi.scopeurls]
         ])
       }),
     DialogModule.forRoot(),
