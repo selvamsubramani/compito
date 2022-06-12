@@ -15,12 +15,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: `${process.env.AUTH0_ISSUER_URL}.well-known/jwks.json`,
+        jwksUri: `${process.env.AZB2C_URL}${process.env.AZB2C_TENANT_NAME}/${process.env.AZB2C_SIGNIN_POLICY}/discovery/v2.0/keys`
       }),
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      audience: `${process.env.AUTH0_AUDIENCE}`,
-      issuer: `${process.env.AUTH0_ISSUER_URL}`,
-      algorithms: ['RS256'],
+      audience: `${process.env.AZB2C_APP_CLIENT_ID}`,
+      issuer: `${process.env.AZB2C_URL}${process.env.AZB2C_ISSUER_ID}/v2.0/`,
+      algorithms: ['RS256']
     });
   }
 

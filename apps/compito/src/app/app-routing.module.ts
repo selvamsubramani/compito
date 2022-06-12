@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
-import { AuthGuard } from '@auth0/auth0-angular';
+// import { AuthGuard } from '@auth0/auth0-angular';
+import { MsalGuard } from '@azure/msal-angular';
 
 const routes: Route[] = [
   {
@@ -10,7 +11,7 @@ const routes: Route[] = [
   },
   {
     path: 'app',
-    canActivateChild: [AuthGuard],
+    canActivateChild: [MsalGuard],
     loadChildren: () => import('./dashboard/dashboard.module').then((m) => m.DashboardModule),
   },
   {
@@ -19,11 +20,13 @@ const routes: Route[] = [
   },
   {
     path: '**',
-    redirectTo: 'auth/login',
+    redirectTo: 'app',
   },
 ];
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, {
+    initialNavigation:'enabled'
+  })],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

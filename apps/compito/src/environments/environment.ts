@@ -8,9 +8,11 @@ export const environment = {
   api: 'http://localhost:3333/api',
   auth: {
     audience: 'compito-api',
-    domain: 'dev-2nisamv9.us.auth0.com',
-    clientId: 'Vo9QfkcZjyuldepohhcvgLzu7uGUa6C9',
-    redirectUri: window.location.origin,
+    domain: 'hblbdevtest.onmicrosoft.com',
+    clientId: '12be6367-3739-4a0d-be17-67c9b4cba24b',
+    tenantName: 'hblbdevtest',
+    signinProfile: 'B2C_1_Signin',
+    redirectUri: 'http://localhost:4200'
   },
 };
 

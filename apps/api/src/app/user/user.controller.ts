@@ -12,8 +12,9 @@ import {
   Req,
   UseGuards,
   UsePipes,
+  Res
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { PERMISSIONS } from '../core/config/permissions.config';
 import { Permissions } from '../core/decorators/permissions.decorator';
 import { Public } from '../core/decorators/public.decorator';
@@ -32,6 +33,7 @@ export class UserController {
   @Permissions(PERMISSIONS.user.read)
   @Get('')
   findAll(@Query() query: RequestParams & { projectId?: string }, @Req() req: RequestWithUser) {
+    console.log("get users");
     return this.userService.findAll(query, req.user);
   }
 
@@ -57,6 +59,29 @@ export class UserController {
     return this.userService.getUserDetails(sessionToken);
   }
 
+ // For Auth0 to access during login flow
+ @Public()
+ @Post('msauth')
+ async getUserDetail(@Req() req: Request, @Res() res: Response) {
+    const body = req.body;
+    const extension = `extension_249ecd7b64e64272a6a6b736f908feae`
+    const payload = {
+      email: body.email,
+      userId: body[`${extension}_userid`],
+      org: body[`${extension}_orgs`]
+    }
+    var data = await this.userService.fetchUserDetails(payload);
+    const { partOfMultipleOrgs, pendingInvites, org, role, projects } = data;
+    res.send({
+      version: "1.0.0",
+      action: "Continue",
+      [`${extension}_orgs`]: JSON.stringify(org),
+      [`${extension}_roles`]: JSON.stringify(role),
+      [`${extension}_projects`]: JSON.stringify(projects),
+      [`${extension}_email`]: body.email
+    },);
+ }
+
   @Get('invites')
   getInvitesForUser(@Req() req: RequestWithUser) {
     return this.userService.getUsersInvites(req.user);
@@ -66,6 +91,7 @@ export class UserController {
   @Permissions(PERMISSIONS.user.read)
   @Get(':id')
   findOne(@Param('id') id: string, @Req() req: RequestWithUser) {
+    console.log(id);
     return this.userService.find(id, req.user);
   }
 

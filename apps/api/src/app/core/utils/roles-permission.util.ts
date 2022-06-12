@@ -18,8 +18,8 @@ export const isOperationAllowed = (requiredRole: Roles, userRole: Role) => {
 };
 
 export const extractUserRole = (user) => {
-  if (user != null && Object.prototype.hasOwnProperty.call(user, 'https://compito.adi.so/roles')) {
-    return user['https://compito.adi.so/roles'];
+  if (user != null && Object.prototype.hasOwnProperty.call(user, 'extension_roles')) {
+    return user['extension_roles'];
   }
   return [];
 };

@@ -23,12 +23,21 @@ export type RequestParamsParsed = {
   [key: string]: any;
 };
 
+// export interface UserPayload {
+//   'https://compito.adi.so/role': Role;
+//   'https://compito.adi.so/org': { id: string; name: string };
+//   'https://compito.adi.so/email': string;
+//   'https://compito.adi.so/projects': string[];
+//   'https://compito.adi.so/userId': string;
+//   email: string;
+// }
+
 export interface UserPayload {
-  'https://compito.adi.so/role': Role;
-  'https://compito.adi.so/org': { id: string; name: string };
-  'https://compito.adi.so/email': string;
-  'https://compito.adi.so/projects': string[];
-  'https://compito.adi.so/userId': string;
+  'extension_roles': Role;
+  'extension_orgs': { id: string; name: string };
+  'extension_email': string;
+  'extension_projects': string[];
+  'extension_userid': string;
   email: string;
 }
 

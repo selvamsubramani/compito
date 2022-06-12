@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { AuthService } from '@auth0/auth0-angular';
+import { MsalService } from '@azure/msal-angular';
 import { UserDetails } from '@compito/api-interfaces';
-import { formatUser, ToastService } from '@compito/web/ui';
+import { formatUser, ToastService, getUserDetails } from '@compito/web/ui';
 import { UsersAction } from '@compito/web/users/state';
 import { Store } from '@ngxs/store';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'compito-profile',
@@ -81,16 +83,17 @@ import { Store } from '@ngxs/store';
 export class ProfileComponent implements OnInit {
   userForm!: FormGroup;
   userId: string | null = null;
-  user$ = this.auth.user$.pipe(formatUser());
+  user$: Observable<UserDetails|null> = new Observable<UserDetails|null>();// = this.auth.user$.pipe(formatUser());
   constructor(
     private fb: FormBuilder,
-    private auth: AuthService,
+    private auth: MsalService,
     private cdr: ChangeDetectorRef,
     private store: Store,
     private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
+    this.user$ = getUserDetails(this.auth.instance.getActiveAccount()?.idTokenClaims);
     this.initForm();
     this.user$.subscribe((user: UserDetails | null) => {
       if (user) {

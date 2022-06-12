@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
+import { MsalService } from '@azure/msal-angular';
 import { CardEvent, DataLoading, Organization, Project, User, UserDetails } from '@compito/api-interfaces';
 import { ProjectsCreateModalComponent } from '@compito/web/projects';
 import { ProjectsAction } from '@compito/web/projects/state';
-import { Breadcrumb, ConfirmModalComponent, formatUser, ToastService } from '@compito/web/ui';
+import { Breadcrumb, ConfirmModalComponent, formatUser, ToastService, getUserDetails } from '@compito/web/ui';
 import { UsersAction, UsersState } from '@compito/web/users/state';
 import { DialogService } from '@ngneat/dialog';
 import { Select, Store } from '@ngxs/store';
@@ -48,17 +49,18 @@ export class OrgsDetailComponent implements OnInit {
   @Select(OrgsState.orgDetailLoading)
   orgDetailLoading$!: Observable<DataLoading>;
 
-  loggedInUser$: Observable<UserDetails | null> = this.auth.user$.pipe(formatUser());
+  loggedInUser$: Observable<UserDetails|null> = new Observable<UserDetails|null>();// = this.auth.user$.pipe(formatUser());
   loggedInUser: UserDetails | null = null;
   constructor(
     private dialog: DialogService,
     private store: Store,
     private activatedRoute: ActivatedRoute,
     private toast: ToastService,
-    private auth: AuthService,
+    private auth: MsalService,
   ) {}
 
   ngOnInit(): void {
+    this.loggedInUser$ = getUserDetails(this.auth.instance.getActiveAccount()?.idTokenClaims);
     if (this.orgId) {
       this.store.dispatch(new OrgsAction.Get(this.orgId));
       this.store.dispatch(new UsersAction.GetAll({}));

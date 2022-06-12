@@ -3,8 +3,9 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
+import { MsalService } from '@azure/msal-angular';
 import { Board, BoardList, BoardListWithTasks, DataLoading, Task, User, UserDetails } from '@compito/api-interfaces';
-import { Breadcrumb, formatUser, TasksCreateModalComponent } from '@compito/web/ui';
+import { Breadcrumb, formatUser, TasksCreateModalComponent, getUserDetails } from '@compito/web/ui';
 import { UsersAction, UsersState } from '@compito/web/users/state';
 import { DialogService } from '@ngneat/dialog';
 import { Select, Store } from '@ngxs/store';
@@ -129,15 +130,17 @@ export class BoardsComponent implements OnInit {
   @Select(UsersState.getAllUsers)
   users$!: Observable<User[]>;
 
-  loggedInUser$: Observable<UserDetails | null> = this.auth.user$.pipe(formatUser());
+  loggedInUser$: Observable<UserDetails|null> = new Observable<UserDetails|null>();// = this.auth.user$.pipe(formatUser());
 
   listName = new FormControl('', [Validators.required, Validators.minLength(2), Validators.maxLength(12)]);
   constructor(
     private dialog: DialogService,
     private store: Store,
     private activatedRoute: ActivatedRoute,
-    private auth: AuthService,
-  ) {}
+    private auth: MsalService,
+  ) {
+    this.loggedInUser$ = getUserDetails(this.auth.instance.getActiveAccount()?.idTokenClaims);
+  }
 
   ngOnInit(): void {
     if (this.taskId) {
