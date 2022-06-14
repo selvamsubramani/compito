@@ -11,8 +11,7 @@ export class RolesGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const requireRole = this.reflector.get<Roles>('role', context.getHandler());
-
-    const userRole = context.getArgs()[0].user['extension_roles'] ?? null;
+    const userRole = JSON.parse(context.getArgs()[0].user['extension_roles']);
     if (!requireRole) {
       return true;
     }
