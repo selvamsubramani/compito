@@ -20,7 +20,7 @@ const routes: Route[] = [
   },
   {
     path: '**',
-    redirectTo: 'app',
+    redirectTo: 'auth/login',
   },
 ];
 @NgModule({
