@@ -28,9 +28,9 @@ export const getUserDetails = (
       'extension_email': email,
       'extension_userid': userId,
     } = user;
-    console.log(role);
-    console.log(org);
-    console.log(email);
+    // console.log(role);
+    // console.log(org);
+    // console.log(email);
     return { role: role as Role, org, projects, userId, email };
   }
   throw new InternalServerErrorException('User data not found');

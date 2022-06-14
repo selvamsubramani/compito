@@ -36,9 +36,9 @@ export function getUserDetails(data: any) {
     } else {
       const { family_name, given_name, name, picture, updated_at, email_verified, sub } = data;
           return of({
-            role: data['extension_roles'],
+            role: JSON.parse(data['extension_roles']),
             userId: data['extension_userid'],
-            org: data['extension_orgs'],
+            org: JSON.parse(data['extension_orgs']),
             family_name,
             given_name,
             nickname: `${given_name}.${family_name}`,
