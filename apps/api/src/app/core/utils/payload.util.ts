@@ -21,6 +21,12 @@ export const getUserDetails = (
   user: UserPayload | null,
 ): { role: Role; org: { id: string; name: string }; projects: string[]; userId: string; email} => {
   if (user) {
+    if(typeof user.extension_roles === 'string') {
+      user.extension_roles = JSON.parse(user.extension_roles) as Role;
+    }
+    if(typeof user.extension_orgs === 'string') {
+      user.extension_orgs = JSON.parse(user.extension_orgs);
+    }
     const {
       'extension_roles': role,
       'extension_projects': projects,
