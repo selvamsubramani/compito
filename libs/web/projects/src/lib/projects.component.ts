@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
+import { MsalService } from '@azure/msal-angular';
 import { CardEvent, DataLoading, Project } from '@compito/api-interfaces';
 import { Breadcrumb, ConfirmModalComponent, ToastService } from '@compito/web/ui';
 import { UsersAction, UsersState } from '@compito/web/users/state';
@@ -53,7 +54,7 @@ export class ProjectsComponent implements OnInit {
     private dialog: DialogService,
     private store: Store,
     private activatedRoute: ActivatedRoute,
-    private auth: AuthService,
+    private auth: MsalService,
     private toast: ToastService,
   ) {}
 
