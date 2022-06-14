@@ -53,7 +53,7 @@ import { Router } from '@angular/router';
   ],
 })
 export class LoginComponent implements OnInit {
-  private readonly _destroying$ = new Subject<void>();
+  // private readonly _destroying$ = new Subject<void>();
   constructor(private broadcastService: MsalBroadcastService, 
     public auth: MsalService, 
     private activatedRoute: ActivatedRoute, 
@@ -64,25 +64,25 @@ export class LoginComponent implements OnInit {
       this.toast.error('Invalid session! Please login again');
     }
 
-    this.broadcastService.inProgress$
-    .pipe(
-      filter((status: InteractionStatus) => status === InteractionStatus.None),
-      takeUntil(this._destroying$)
-    )
-    .subscribe((res) => {
-      console.log(`Login Component - ${res}`);
-    })
+    // this.broadcastService.inProgress$
+    // .pipe(
+    //   filter((status: InteractionStatus) => status === InteractionStatus.None),
+    //   takeUntil(this._destroying$)
+    // )
+    // .subscribe((res) => {
+    //   console.log(`Login Component - ${res}`);
+    // })
 
-    this.broadcastService.msalSubject$
-      .pipe(filter((msg: EventMessage) => msg.eventType === EventType.LOGIN_SUCCESS))
-      .subscribe(() =>
-      {
-        if(this.auth.instance.getAllAccounts().length > 0) {
-          this.auth.instance.setActiveAccount(this.auth.instance.getAllAccounts()[0]); 
-        }
-        console.log("Active Account", this.auth.instance.getActiveAccount());
-        this.router.navigate(['/app']); 
-      });
+    // this.broadcastService.msalSubject$
+    //   .pipe(filter((msg: EventMessage) => msg.eventType === EventType.LOGIN_SUCCESS))
+    //   .subscribe(() =>
+    //   {
+    //     if(this.auth.instance.getAllAccounts().length > 0) {
+    //       this.auth.instance.setActiveAccount(this.auth.instance.getAllAccounts()[0]); 
+    //     }
+    //     console.log("Active Account", this.auth.instance.getActiveAccount());
+    //     this.router.navigate(['/app']); 
+    //   });
     }
 
   login() {
@@ -90,8 +90,8 @@ export class LoginComponent implements OnInit {
     this.auth.instance.loginRedirect();
   }
 
-  ngOnDestroy(): void {
-    this._destroying$.next(undefined);
-    this._destroying$.complete();
-  }
+  // ngOnDestroy(): void {
+  //   this._destroying$.next(undefined);
+  //   this._destroying$.complete();
+  // }
 }

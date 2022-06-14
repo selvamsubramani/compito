@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
+import { MsalService } from '@azure/msal-angular';
 import { DataLoading, DataLoadingState, Task } from '@compito/api-interfaces';
 import { Breadcrumb } from '@compito/web/ui';
 import { Select, Store } from '@ngxs/store';
@@ -47,7 +48,7 @@ export class TasksComponent implements OnInit {
       return loading;
     }),
   );
-  constructor(private store: Store, private auth: AuthService) {}
+  constructor(private store: Store, private auth: MsalService) {}
 
   ngOnInit(): void {
     this.store.dispatch(new TasksActions.GetMyTasks());

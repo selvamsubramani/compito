@@ -10,9 +10,10 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
+import { MsalService } from '@azure/msal-angular';
 import { UserDetails } from '@compito/api-interfaces';
-import { Subscription } from 'rxjs';
-import { formatUser } from '../util';
+import { Observable, Subscription } from 'rxjs';
+import { getUserDetails } from '../util';
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
@@ -29,20 +30,22 @@ export class PermissionsDirective implements OnInit, OnDestroy {
     this.requiredPermission = permission;
     this.updateView();
   }
+  user$: Observable<UserDetails|null> = new Observable<UserDetails|null>();
   constructor(
     private tpl: TemplateRef<any>,
     private vcr: ViewContainerRef,
-    private authService: AuthService,
+    private authService: MsalService,
     private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
-    this.subscription = this.authService.user$.pipe(formatUser()).subscribe((user) => {
-      if (user) {
-        this.vcr.clear();
-        this.loggedInUser = user;
-        this.updateView();
-      }
+    this.user$ = getUserDetails(this.authService.instance.getActiveAccount()?.idTokenClaims);
+    this.subscription = this.user$.subscribe((u) => {
+    if (u) {
+          this.vcr.clear();
+          this.loggedInUser = u;
+          this.updateView();
+        }
     });
   }
 
