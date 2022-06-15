@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-// import { AuthService } from '@auth0/auth0-angular';
 import { MsalService } from '@azure/msal-angular'
 import { Board, DataLoading, Project, Task, UserDetails } from '@compito/api-interfaces';
 import { formatUser, getUserDetails } from '@compito/web/ui';

@@ -2,7 +2,6 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { AuthService } from '@auth0/auth0-angular';
 import { MsalService } from '@azure/msal-angular';
 import { Board, BoardList, BoardListWithTasks, DataLoading, Task, User, UserDetails } from '@compito/api-interfaces';
 import { Breadcrumb, formatUser, TasksCreateModalComponent, getUserDetails } from '@compito/web/ui';

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { AuthService } from '@auth0/auth0-angular';
 import { MsalService } from '@azure/msal-angular';
 import { UserDetails } from '@compito/api-interfaces';
 import { formatUser, ToastService, getUserDetails } from '@compito/web/ui';

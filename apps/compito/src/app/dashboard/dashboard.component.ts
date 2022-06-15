@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-// import { AuthService } from '@auth0/auth0-angular';
 import { MsalService } from '@azure/msal-angular';
 import { Organization } from '@compito/api-interfaces';
 import { OrgsAction } from '@compito/web/orgs/state/orgs.actions';

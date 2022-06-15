@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { AuthService } from '@auth0/auth0-angular';
 import { MsalService } from '@azure/msal-angular';
 import { CardEvent, DataLoading, Invite, Organization, UserDetails } from '@compito/api-interfaces';
 import { Breadcrumb, ConfirmModalComponent, formatUser, ToastService, getUserDetails } from '@compito/web/ui';

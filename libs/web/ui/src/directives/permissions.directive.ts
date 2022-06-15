@@ -9,7 +9,6 @@ import {
   TemplateRef,
   ViewContainerRef,
 } from '@angular/core';
-import { AuthService } from '@auth0/auth0-angular';
 import { MsalService } from '@azure/msal-angular';
 import { UserDetails } from '@compito/api-interfaces';
 import { Observable, Subscription } from 'rxjs';

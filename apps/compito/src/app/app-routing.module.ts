@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
-// import { AuthGuard } from '@auth0/auth0-angular';
 import { MsalGuard } from '@azure/msal-angular';
 
 const routes: Route[] = [

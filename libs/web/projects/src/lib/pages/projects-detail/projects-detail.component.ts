@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AuthService } from '@auth0/auth0-angular';
 import { MsalService } from '@azure/msal-angular';
 import { Board, CardEvent, DataLoading, Project, User } from '@compito/api-interfaces';
 import { Breadcrumb, ConfirmModalComponent, formatUser, ToastService, getUserDetails } from '@compito/web/ui';

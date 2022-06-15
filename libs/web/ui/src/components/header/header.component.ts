@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { AuthService } from '@auth0/auth0-angular';
 import { MsalService } from '@azure/msal-angular';
 import { UserDetails } from '@compito/api-interfaces';
 import { BehaviorSubject, Observable } from 'rxjs';

@@ -1,10 +1,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '@auth0/auth0-angular';
 import { MsalService } from '@azure/msal-angular';
 import { DataLoading, DataLoadingState, UserDetails } from '@compito/api-interfaces';
-import { ToastService } from '@compito/web/ui';
+import { ToastService, getUserDetails } from '@compito/web/ui';
 import { ENV_TOKEN } from '@compito/web/ui/tokens';
 import { BehaviorSubject, map, Observable } from 'rxjs';
 import { OrgSelectionService } from './org-selection.service';
@@ -51,15 +50,18 @@ export class OrgSelectionComponent implements OnInit {
   loadingDetailsState = new BehaviorSubject<DataLoading>({ type: DataLoadingState.loading });
   loadingDetailsState$ = this.loadingDetailsState.asObservable();
 
-  userEmail$ =  this.auth.user$.pipe(map((user) => user?.email ?? null));
+  user$: Observable<UserDetails|null> = new Observable<UserDetails|null>();
+  userEmail$: Observable<string|null> = new Observable<string|null>();// this.auth.user$.pipe(map((user) => user?.email ?? null));
   constructor(
     private orgService: OrgSelectionService,
     private activatedRoute: ActivatedRoute,
-    private auth: AuthService,
+    private auth: MsalService,
     private toast: ToastService,
     private router: Router,
     @Inject(ENV_TOKEN) private environment: any,
   ) {
+    this.user$ = getUserDetails(this.auth.instance.getActiveAccount()?.idTokenClaims);
+    this.userEmail$ = this.user$.pipe(map((u) => u?.email?? null));
   }
 
   ngOnInit(): void {
